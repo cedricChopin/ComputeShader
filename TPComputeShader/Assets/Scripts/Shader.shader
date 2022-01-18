@@ -61,11 +61,13 @@ Shader "Custom/Particle" {
 
 			return o;
 		}
+		fixed _Radius;
 		[maxvertexcount(4)]
 		void geom(point v2g i[1], inout TriangleStream<g2f> triStream)
 		{
 			g2f p;
-			float s = 0.01;
+			
+			float s = _Radius;
 
 			p.color = i[0].color;
 			p.position = i[0].position + float4(-s, -s * 2, 0, 0); // En haut a gauche
