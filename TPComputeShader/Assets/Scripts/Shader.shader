@@ -1,4 +1,10 @@
 Shader "Custom/Particle" {
+	Properties
+	{
+		_MainTex("Texture", 2D) = "white" {}
+		_Radius("Sphere Radius", float) = 0.01
+	}
+		
 	SubShader {
 		Pass {
 		Tags{ "RenderType" = "Opaque" }
@@ -9,9 +15,9 @@ Shader "Custom/Particle" {
 		// Physically based Standard lighting model, and enable shadows on all light types
 		#pragma vertex vert
 		#pragma fragment frag
+		#pragma geometry geom 
 
 		#include "UnityCG.cginc"
-		#include "Autolight.cginc"
 
 		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 5.0
@@ -25,20 +31,17 @@ Shader "Custom/Particle" {
 		struct PS_INPUT{
 			float4 position : SV_POSITION;
 			float4 color : COLOR;
+			float3 normal : NORMAL;
 		};
 		struct v2g
 		{
-			float4 vertex : POSITION;
-			float3 normal : NORMAL;
-			float2 uv : TEXCOORD0;
+			float4 position : SV_POSITION;
+			float4 color : COLOR;
 		};
 		struct g2f
 		{
-			float2 uv : TEXCOORD0;
-			UNITY_FOG_COORDS(1)
-				float4 vertex : SV_POSITION;
-			float3 normal : NORMAL;
-			unityShadowCoord4 _ShadowCoord : TEXCOORD1;
+			float4 position : SV_POSITION;
+			float4 color : COLOR;
 		};
 		// particles' data
 		StructuredBuffer<Particle> particleBuffer;
@@ -58,11 +61,29 @@ Shader "Custom/Particle" {
 
 			return o;
 		}
+		[maxvertexcount(4)]
+		void geom(point v2g i[1], inout TriangleStream<g2f> triStream)
+		{
+			g2f p;
+			float s = 0.01;
 
+			p.color = i[0].color;
+			p.position = i[0].position + float4(-s, -s * 2, 0, 0); // En haut a gauche
+			triStream.Append(p);
+			p.position = i[0].position + float4(s, -s *2, 0, 0); // En haut a droite
+			triStream.Append(p);
+			p.position = i[0].position + float4(-s, s * 2, 0, 0); // En bas a gauche
+			triStream.Append(p);
+			p.position = i[0].position + float4(s, s * 2, 0, 0); // En bas a droite
+			triStream.Append(p);
+			triStream.RestartStrip();
+		}
 		float4 frag(PS_INPUT i) : COLOR
 		{
 			return i.color;
 		}
+
+		
 
 		ENDCG
 		}
