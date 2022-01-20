@@ -7,6 +7,9 @@ public class GenerateParticle : MonoBehaviour
 
     private Vector2 cursorPos;
 
+    [SerializeField]
+    private Transform pos;
+
     // struct
     struct Particle
     {
@@ -145,12 +148,14 @@ public class GenerateParticle : MonoBehaviour
 
         float[] mousePosition2D = { cursorPos.x, cursorPos.y };
 
+        float[] objPos = { pos.position.x, pos.position.y, pos.position.z };
+
         // Send datas to the compute shader
         computeShader.SetFloat("gravityPower", gravityPower);
         computeShader.SetFloat("deltaTime", Time.deltaTime);
         computeShader.SetFloat("dirPower", dirPower);
         computeShader.SetFloat("lifeTime", lifeTime);
-        computeShader.SetFloats("mousePosition", mousePosition2D);
+        computeShader.SetFloats("mousePosition", objPos);
 
         // Update the Particles
         computeShader.Dispatch(mComputeShaderKernelID, mWarpCount, 1, 1);

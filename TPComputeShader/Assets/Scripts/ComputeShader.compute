@@ -13,7 +13,7 @@ RWStructuredBuffer<Particle> particleBuffer;
 
 // Variables set from the CPU
 float deltaTime;
-float2 mousePosition;
+float3 mousePosition;
 float gravityPower;
 float lifeTime;
 float dirPower;
@@ -34,7 +34,7 @@ void cs_main(uint3 id : SV_DispatchThreadID)
 {
 	particleBuffer[id.x].life -= deltaTime;
 
-	float3 delta = float3(mousePosition.xy, 3) - particleBuffer[id.x].position;
+	float3 delta = mousePosition - particleBuffer[id.x].position;
 	float3 dir = normalize(delta);
 	float3 gravity = float3(0, -1, 0);
 	//particleBuffer[id.x].velocity += dir;
@@ -51,7 +51,7 @@ void cs_main(uint3 id : SV_DispatchThreadID)
 		float f2 = float(rand_xorshift()) * (1.0 / 4294967296.0) - 0.5;
 		float3 normalF3 = normalize(float3(f0, f1, f2)) * 0.8f;
 		normalF3 *= float(rand_xorshift()) * (1.0 / 4294967296.0);
-		particleBuffer[id.x].position = float3(normalF3.x + mousePosition.x, normalF3.y + mousePosition.y, normalF3.z + 3.0);
+		particleBuffer[id.x].position = float3(normalF3.x + mousePosition.x, normalF3.y + mousePosition.y, normalF3.z + mousePosition.z);
 		
 		// reset the life of this particle
 		particleBuffer[id.x].life = lifeTime;

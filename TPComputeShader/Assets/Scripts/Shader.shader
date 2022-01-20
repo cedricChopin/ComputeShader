@@ -78,7 +78,7 @@ Shader "Custom/Particle" {
 			triStream.Append(p);
 			p.position = i[0].position + float4(s, s * 2, 0, 0); // En bas a droite
 			triStream.Append(p);
-			triStream.RestartStrip();
+			triStream.RestartStrip(); // utile si tu veux pas crash ta race
 		}
 		float4 frag(PS_INPUT i) : COLOR
 		{
