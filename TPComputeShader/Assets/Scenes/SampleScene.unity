@@ -132,7 +132,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 628dd8473b798c04382e571fa0928702, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 628dd8473b798c04382e571fa0928702, type: 3}
       propertyPath: m_LocalScale.x
@@ -193,7 +193,7 @@ PrefabInstance:
     - target: {fileID: -5738929356375114689, guid: 628dd8473b798c04382e571fa0928702, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 10756, guid: 0000000000000000e000000000000000, type: 0}
+      objectReference: {fileID: 6424373300581580012, guid: ca4d24ebe79cb3644b8cc77f2bf59136, type: 3}
     - target: {fileID: 919132149155446097, guid: 628dd8473b798c04382e571fa0928702, type: 3}
       propertyPath: m_Name
       value: Meuf
@@ -301,6 +301,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05056b1220f94f24f83aa6bbb5f604ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rb: {fileID: 0}
   onGround: 0
 --- !u!1 &96491530 stripped
 GameObject:
@@ -440,7 +441,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 96491523}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &464838002
 MonoBehaviour:
@@ -456,7 +457,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pos: {fileID: 96491523}
   plane: {fileID: 357548869}
-  mesh: {fileID: 96491531}
+  MEUF: {fileID: 96491531}
   particleCount: 6000
   gravityPower: 1
   lifeTime: 4
@@ -632,10 +633,10 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.43, z: -4.39}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.86, z: -8.78}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
-  m_Father: {fileID: 96491523}
-  m_RootOrder: 7
+  m_Father: {fileID: 0}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

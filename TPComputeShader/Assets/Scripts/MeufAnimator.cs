@@ -11,6 +11,6 @@ public class MeufAnimator : MonoBehaviour
     void Update()
     {
         _animator.SetBool("Jumping", !controller.onGround);
-        _animator.SetFloat("Speed", gameObject.GetComponent<Rigidbody>().velocity.magnitude);
+        _animator.SetFloat("Speed", controller.rb.velocity.magnitude);
     }
 }

@@ -234,9 +234,6 @@ public class GenerateParticle : MonoBehaviour
         //computeShader.Dispatch(handle_init, mWarpCount,1,1);
         computeShader.Dispatch(mComputeShaderKernelID, mWarpCount, 1, 1);
         output.GetData(result);
-        
-        if (result[0] > 0)
-            Debug.Log("collision");
     }
 
     void OnGUI()
