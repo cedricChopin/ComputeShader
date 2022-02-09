@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     Rigidbody rb;
     private float speed = 5.2f;
-    bool onGround = false;
+    public bool onGround = false;
 
     private void Start()
     {
