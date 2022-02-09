@@ -1,4 +1,5 @@
 #pragma kernel cs_main
+//#pragma kernel cs_init
 
 // Particle's data
 struct Particle
@@ -11,6 +12,9 @@ struct Particle
 // Particle's data, shared with the shader
 RWStructuredBuffer<Particle> particleBuffer;
 
+//output collision
+RWStructuredBuffer<float> output;
+
 // Variables set from the CPU
 float deltaTime;
 float3 mousePosition;
@@ -20,6 +24,12 @@ float dirPower;
 
 uint rng_state;
 
+float4 scale, pos, rot;
+
+struct Plane {
+	float3 normal;
+	float direction;
+};
 
 uint rand_xorshift()
 {
@@ -29,19 +39,47 @@ uint rand_xorshift()
 	return rng_state;
 }
 
+Plane ComputePlane(float3 scale, float3 pos, float3 rot) {
+	Plane p;
+	p.normal = normalize(cross(pos - scale, rot - scale));
+	p.direction = dot(p.normal, scale);
+	return p;
+}
+
+float DistPointToPlane(float3 posPoint, Plane p) {
+	return dot(posPoint, p.normal) - p.direction;
+}
+
+//
+// [numthreads(256,1,1)]
+// void cs_init(uint3 id : SV_DispatchThreadID)
+// {
+// 	output[id.x] = 3;
+// }
+
 [numthreads(256, 1, 1)]
 void cs_main(uint3 id : SV_DispatchThreadID)
 {
-	particleBuffer[id.x].life -= deltaTime;
-
+	output[id.x] = 3;
+	Plane p = ComputePlane(scale.xyz, pos.xyz, rot.xyz);
+	float dist = DistPointToPlane(particleBuffer[id.x].position, p);
+	float value;
+	
 	float3 delta = mousePosition - particleBuffer[id.x].position;
 	float3 dir = normalize(delta);
 	float3 gravity = float3(0, -1, 0);
+	
+	if(abs(dist) < 0.01)
+	{
+		particleBuffer[id.x].velocity = -dot((particleBuffer[id.x].velocity),p.normal) * p.normal + particleBuffer[id.x].velocity/2;
+	}
+
 	//particleBuffer[id.x].velocity += dir;
 	particleBuffer[id.x].velocity +=  gravity * deltaTime * gravityPower;
 	particleBuffer[id.x].velocity +=  dir * dirPower;
 	particleBuffer[id.x].position += particleBuffer[id.x].velocity * deltaTime;
-
+	
+	particleBuffer[id.x].life -= deltaTime;
 	if (particleBuffer[id.x].life < 0)
 	{
 		rng_state = id.x;
@@ -57,5 +95,5 @@ void cs_main(uint3 id : SV_DispatchThreadID)
 		particleBuffer[id.x].life = lifeTime;
 		particleBuffer[id.x].velocity = float3(0, 0, 0);
 	}
-
+	
 }

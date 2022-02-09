@@ -43,7 +43,6 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
-        Debug.Log(collision.transform.name);
         if (collision.transform.name == "Plane")
         {
             onGround = true;

@@ -10,6 +10,8 @@ public class GenerateParticle : MonoBehaviour
     [SerializeField]
     private Transform pos;
 
+    public GameObject plane;
+
     // struct
     struct Particle
     {
@@ -63,8 +65,23 @@ public class GenerateParticle : MonoBehaviour
     /// <summary>
     /// Buffer contenant les particules
     /// </summary>
-    ComputeBuffer particleBuffer;
+    private ComputeBuffer particleBuffer;
 
+    /// <summary>
+    /// Buffer des outputs de collisions
+    /// </summary>
+    private ComputeBuffer output;
+
+    /// <summary>
+    /// faut un array avant parce que ça marche po....
+    /// </summary>
+    private float[] outputArray;
+
+    /// <summary>
+    /// Tableau de resultats des collisions 
+    /// </summary>
+    private float[] result;
+    
     /// <summary>
     /// Number of particle per warp.
     /// </summary>
@@ -73,7 +90,12 @@ public class GenerateParticle : MonoBehaviour
     /// <summary>
     /// Number of warp needed.
     /// </summary>
-    private int mWarpCount; 
+    private int mWarpCount;
+
+    /// <summary>
+    /// on initialise car il casse les couilles....
+    /// </summary>
+    private int handle_init;
 
     //public ComputeShader shader;
 
@@ -91,6 +113,8 @@ public class GenerateParticle : MonoBehaviour
 
         // initialize the particles
         particleArray = new Particle[particleCount];
+        outputArray = new float[1];
+        outputArray[0] = 0;
 
         for (int i = 0; i < particleCount; i++)
         {
@@ -117,17 +141,22 @@ public class GenerateParticle : MonoBehaviour
 
         // create compute buffer
         particleBuffer = new ComputeBuffer(particleCount, SIZE_PARTICLE);
+        output = new ComputeBuffer(1, 4, ComputeBufferType.Default);
 
         particleBuffer.SetData(particleArray);
+        output.SetData(outputArray);
 
         // find the id of the kernel
+        //handle_init = computeShader.FindKernel("cs_init");
         mComputeShaderKernelID = computeShader.FindKernel("cs_main");
 
         // bind the compute buffer to the shader and the compute shader
+        //computeShader.SetBuffer(handle_init, "output", output);
         computeShader.SetBuffer(mComputeShaderKernelID, "particleBuffer", particleBuffer);
-        
+        computeShader.SetBuffer(mComputeShaderKernelID, "output", output);
 
         material.SetBuffer("particleBuffer", particleBuffer);
+        result = new float[1];
     }
 
     void OnRenderObject()
@@ -145,7 +174,10 @@ public class GenerateParticle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        computeShader.SetVector("scale", plane.transform.TransformPoint(new Vector3(1.0f, 0.0f, 1.0f)));
+        computeShader.SetVector("pos", plane.transform.TransformPoint(new Vector3(1.0f,0.0f,0.0f)));
+        computeShader.SetVector("rot", plane.transform.TransformPoint(new Vector3(0.0f,0.0f,0.0f)));
+        
         float[] mousePosition2D = { cursorPos.x, cursorPos.y };
 
         float[] objPos = { pos.position.x, pos.position.y, pos.position.z };
@@ -158,7 +190,12 @@ public class GenerateParticle : MonoBehaviour
         computeShader.SetFloats("mousePosition", objPos);
 
         // Update the Particles
+        //computeShader.Dispatch(handle_init, mWarpCount,1,1);
         computeShader.Dispatch(mComputeShaderKernelID, mWarpCount, 1, 1);
+        output.GetData(result);
+        
+        if (result[0] > 0)
+            Debug.Log("collision");
     }
 
     void OnGUI()
@@ -182,7 +219,11 @@ public class GenerateParticle : MonoBehaviour
         GUILayout.Label("Screen pixels: " + c.pixelWidth + ":" + c.pixelHeight);
         GUILayout.Label("Mouse position: " + mousePos);
         GUILayout.Label("World position: " + p.ToString("F3"));
+
+        GUILayout.Label("Collision detectee" + result.GetValue(0));
+        
         GUILayout.EndArea();
+        
         
     }
 }
