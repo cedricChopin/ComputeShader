@@ -12,6 +12,18 @@ public class GenerateParticle : MonoBehaviour
 
     public GameObject plane;
 
+    /// <summary>
+    /// Mesh de MEUF
+    /// </summary>
+    [SerializeField]
+    private MeshFilter MEUF;
+
+    /// <summary>
+    /// Tableau des vertices
+    /// </summary>
+    private Vector3[] vertices;
+    private Vector3[] verticesWorld;
+
     // struct
     struct Particle
     {
@@ -78,6 +90,11 @@ public class GenerateParticle : MonoBehaviour
     private float[] outputArray;
 
     /// <summary>
+    /// COmputeuffer pour les vertices de MEUF
+    /// </summary>
+    private ComputeBuffer verticesBuffer;
+
+    /// <summary>
     /// Tableau de resultats des collisions 
     /// </summary>
     private float[] result;
@@ -111,11 +128,13 @@ public class GenerateParticle : MonoBehaviour
     {
         mWarpCount = Mathf.CeilToInt((float)particleCount / WARP_SIZE);
 
+        vertices = MEUF.sharedMesh.vertices;
         // initialize the particles
         particleArray = new Particle[particleCount];
         outputArray = new float[1];
         outputArray[0] = 0;
-
+        int indiceVertex = 0;
+        verticesWorld = vertices;
         for (int i = 0; i < particleCount; i++)
         {
             float x = Random.value * 2 - 1.0f;
@@ -126,10 +145,16 @@ public class GenerateParticle : MonoBehaviour
             xyz *= Random.value;
             xyz *= 0.5f;
 
+            Vector3 posVertice = MEUF.transform.TransformPoint( vertices[indiceVertex]);
+            verticesWorld[indiceVertex] = posVertice;
+            //particleArray[i].position.x = xyz.x;
+            //particleArray[i].position.y = xyz.y;
+            //particleArray[i].position.z = xyz.z + 3;
 
-            particleArray[i].position.x = xyz.x;
-            particleArray[i].position.y = xyz.y;
-            particleArray[i].position.z = xyz.z + 3;
+            particleArray[i].position.x = posVertice.x;
+            particleArray[i].position.y = posVertice.y;
+            particleArray[i].position.z = posVertice.z;
+
 
             particleArray[i].velocity.x = 0;
             particleArray[i].velocity.y = 0;
@@ -137,14 +162,24 @@ public class GenerateParticle : MonoBehaviour
 
             // Initial life value
             particleArray[i].life = Random.value * (lifeTime + 1.0f) + 1.0f;
+            if(indiceVertex + 1 < vertices.Length)
+            {
+                indiceVertex++;
+            }
+            else
+            {
+                indiceVertex = 0;
+            }
         }
 
         // create compute buffer
         particleBuffer = new ComputeBuffer(particleCount, SIZE_PARTICLE);
         output = new ComputeBuffer(1, 4, ComputeBufferType.Default);
+        verticesBuffer = new ComputeBuffer(vertices.Length, 12, ComputeBufferType.Default);
 
         particleBuffer.SetData(particleArray);
         output.SetData(outputArray);
+        verticesBuffer.SetData(verticesWorld);
 
         // find the id of the kernel
         //handle_init = computeShader.FindKernel("cs_init");
@@ -154,6 +189,7 @@ public class GenerateParticle : MonoBehaviour
         //computeShader.SetBuffer(handle_init, "output", output);
         computeShader.SetBuffer(mComputeShaderKernelID, "particleBuffer", particleBuffer);
         computeShader.SetBuffer(mComputeShaderKernelID, "output", output);
+        computeShader.SetBuffer(mComputeShaderKernelID, "vertices", verticesBuffer);
 
         material.SetBuffer("particleBuffer", particleBuffer);
         result = new float[1];
@@ -177,16 +213,21 @@ public class GenerateParticle : MonoBehaviour
         computeShader.SetVector("scale", plane.transform.TransformPoint(new Vector3(1.0f, 0.0f, 1.0f)));
         computeShader.SetVector("pos", plane.transform.TransformPoint(new Vector3(1.0f,0.0f,0.0f)));
         computeShader.SetVector("rot", plane.transform.TransformPoint(new Vector3(0.0f,0.0f,0.0f)));
-        
+        vertices = MEUF.sharedMesh.vertices;
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            verticesWorld[i] = MEUF.transform.TransformPoint(vertices[i]);
+        }
         float[] mousePosition2D = { cursorPos.x, cursorPos.y };
-
-        float[] objPos = { pos.position.x, pos.position.y, pos.position.z };
-
+        Vector3 posWorld = transform.TransformPoint(MEUF.transform.position);
+        float[] objPos = { posWorld.x, posWorld.y, posWorld.z };
+        verticesBuffer.SetData(verticesWorld);
         // Send datas to the compute shader
         computeShader.SetFloat("gravityPower", gravityPower);
         computeShader.SetFloat("deltaTime", Time.deltaTime);
         computeShader.SetFloat("dirPower", dirPower);
         computeShader.SetFloat("lifeTime", lifeTime);
+        computeShader.SetFloat("lenVertices", vertices.Length);
         computeShader.SetFloats("mousePosition", objPos);
 
         // Update the Particles
@@ -219,8 +260,6 @@ public class GenerateParticle : MonoBehaviour
         GUILayout.Label("Screen pixels: " + c.pixelWidth + ":" + c.pixelHeight);
         GUILayout.Label("Mouse position: " + mousePos);
         GUILayout.Label("World position: " + p.ToString("F3"));
-
-        GUILayout.Label("Collision detectee" + result.GetValue(0));
         
         GUILayout.EndArea();
         

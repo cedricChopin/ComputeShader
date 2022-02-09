@@ -15,7 +15,11 @@ RWStructuredBuffer<Particle> particleBuffer;
 //output collision
 RWStructuredBuffer<float> output;
 
+//Vertices
+RWStructuredBuffer<float3> vertices;
+
 // Variables set from the CPU
+float lenVertices;
 float deltaTime;
 float3 mousePosition;
 float gravityPower;
@@ -89,7 +93,8 @@ void cs_main(uint3 id : SV_DispatchThreadID)
 		float f2 = float(rand_xorshift()) * (1.0 / 4294967296.0) - 0.5;
 		float3 normalF3 = normalize(float3(f0, f1, f2)) * 0.8f;
 		normalF3 *= float(rand_xorshift()) * (1.0 / 4294967296.0);
-		particleBuffer[id.x].position = float3(normalF3.x + mousePosition.x, normalF3.y + mousePosition.y, normalF3.z + mousePosition.z);
+		//particleBuffer[id.x].position = float3(normalF3.x + mousePosition.x, normalF3.y + mousePosition.y, normalF3.z + mousePosition.z);
+		particleBuffer[id.x].position = vertices[id.x % lenVertices];
 		
 		// reset the life of this particle
 		particleBuffer[id.x].life = lifeTime;
