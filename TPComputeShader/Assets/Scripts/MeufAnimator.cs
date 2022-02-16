@@ -11,6 +11,9 @@ public class MeufAnimator : MonoBehaviour
     void Update()
     {
         _animator.SetBool("Jumping", !controller.onGround);
-        _animator.SetFloat("Speed", controller.rb.velocity.magnitude);
+
+        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+            _animator.SetBool("Walking", true);
+        else _animator.SetBool("Walking", false);
     }
 }

@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
@@ -34,12 +34,13 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Euler(0f, targetAngle, 0f);
         }
         
-        rb.velocity = direction * speed;
-    }
+        rb.position += direction * speed * Time.deltaTime;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && onGround) rb.velocity += Vector3.up * 5;
+        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        {
+            rb.AddForce(Vector3.up * 5, ForceMode.Impulse);
+            Debug.Log("Meuf saute");
+        }
     }
 
     private void OnCollisionExit(Collision collision)

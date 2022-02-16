@@ -155,7 +155,6 @@ public class GenerateParticle : MonoBehaviour
             particleArray[i].position.y = posVertice.y;
             particleArray[i].position.z = posVertice.z;
 
-
             particleArray[i].velocity.x = 0;
             particleArray[i].velocity.y = 0;
             particleArray[i].velocity.z = 0;
@@ -195,6 +194,20 @@ public class GenerateParticle : MonoBehaviour
         result = new float[1];
     }
 
+    void SetParticlePos()
+    {
+        for(int indiceVertex = 0; indiceVertex < particleCount; indiceVertex++)
+        {
+            Vector3 posVertice = MEUF.transform.TransformPoint(vertices[indiceVertex%vertices.Length]);
+            verticesWorld[indiceVertex] = posVertice;
+
+            particleArray[indiceVertex].position.x = posVertice.x;
+            particleArray[indiceVertex].position.y = posVertice.y;
+            particleArray[indiceVertex].position.z = posVertice.z;
+        }
+        
+    }
+
     void OnRenderObject()
     {
         material.SetPass(0);
@@ -218,6 +231,7 @@ public class GenerateParticle : MonoBehaviour
         {
             verticesWorld[i] = MEUF.transform.TransformPoint(vertices[i]);
         }
+
         float[] mousePosition2D = { cursorPos.x, cursorPos.y };
         Vector3 posWorld = transform.TransformPoint(MEUF.transform.position);
         float[] objPos = { posWorld.x, posWorld.y, posWorld.z };
